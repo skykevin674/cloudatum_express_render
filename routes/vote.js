@@ -24,7 +24,7 @@ const prefetchVote = (req, res) => {
   let map = {}, query = trimQuery(req.query);
   Rx.Observable.zip(
     VoteRequest.getWxConfig(query.originalid, `${req.protocol}://${req.hostname}${req.path}`),
-    VoteRequest.getFansInfo(query.openid || query.auth2Id, query.originalid, query.scope, query.auth2Token),
+    VoteRequest.getFansInfo(query.openid || query.auth2Id, query.originalid, query.scope, query.auth2Token, query.auth2UnionId, query.type),
     VoteRequest.getConfig(query.activityId),
     VoteRequest.addPv(query.activityId),
     VoteRequest.getVoteInfo(query.activityId),

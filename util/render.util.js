@@ -30,8 +30,19 @@ module.exports = (function () {
 
   const checkAuth = (req, res) => {
     const scope = req.query['scope'], authId = req.query['auth2Id'];
+    let originalid;
+    switch (req.query['type']){
+      case '1':
+        originalid = req.query['originalid'];
+        break;
+      case '2':
+        originalid = 'gh_64e30d75c9ce';
+        break;
+      default:
+        return true;
+    }
     if(scope && !authId) {
-      Request.getAuthUrl(req.query['originalid'], `${req.protocol}://${req.hostname}${req.originalUrl}`, scope).subscribe(data => {
+      Request.getAuthUrl(originalid, `${req.protocol}://${req.hostname}${req.originalUrl}`, scope).subscribe(data => {
         if(data.data.code == 0) {
           res.redirect(data.data.msg);
         } else {

@@ -35,28 +35,50 @@ function MyRequest () {
     return requestObservable('http://base.wechat.cloudatum.com/api/getInfoByAccessToken',
       {originalid, accessToken, openid}, 'get');
   };
-
-  const getFansInfo = (openid, originalId, scope, token) => {
-    return Rx.Observable.if(() => {
-        return scope == 'snsapi_userinfo' && token;
-      },
-      Rx.Observable.concat(
-        requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
-          {originalid: originalId, openid: openid, forceUpdate: 0}, 'get'),
-        getFansInfoByToken(token, openid, originalId)
-      ).first(data => data.data.code == 0),
-      Rx.Observable.if(
+  const fromMp = (openid, originalId) => {
+    return Rx.Observable.if(
         () => {
           return null == openid;
         },
         Rx.Observable.of({code: -1}),
         Rx.Observable.concat(
-          requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
-            {originalid: originalId, openid: openid, forceUpdate: 0}, 'get'),
-          requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
-            {originalid: originalId, openid: openid, forceUpdate: 1}, 'get')
+            requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
+                {originalid: originalId, openid: openid, forceUpdate: 0}, 'get'),
+            requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
+                {originalid: originalId, openid: openid, forceUpdate: 1}, 'get')
         ).first(data => (data.data.code == 0 && data.data.body.nickname) || data.data.code == -1)
-      ));
+    );
+  };
+
+  const fromSp = (openid, originalId, token, scope) => {
+    return Rx.Observable.if(() => {
+          return scope == 'snsapi_userinfo' && token;
+        },
+        Rx.Observable.concat(
+            requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
+                {originalid: originalId, openid: openid, forceUpdate: 0}, 'get'),
+            getFansInfoByToken(token, openid, originalId)
+        ).first(data => data.data.code == 0),
+        fromMp(openid, originalId)
+    );
+  };
+
+  const fromOpen = (originalId, unionId) => {
+    return requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
+        {originalid: originalId, unionid: unionId}, 'get')
+  };
+
+  const getFansInfo = (openid, originalId, scope, token, unionId, type) => {
+    switch (type) {
+      case '1':
+        return fromSp(openid, originalId, token, scope);
+        break;
+      case '2':
+        return fromOpen(originalId, unionId);
+        break;
+      default:
+        return fromMp(openid, originalId);
+    }
   };
 
   return {requestObservable, getWxConfig, getFansInfo, getAuthUrl};

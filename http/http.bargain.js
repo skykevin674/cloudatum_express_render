@@ -16,9 +16,9 @@ MyRequest.getMy = (activityId, openid, isRank) => {
     {activityId, openid, isRank}, 'get');
 };
 
-MyRequest.getConfig = (activityId, openid, isRank) => {
-  return MyRequest.requestObservable('http://activity.wechat.cloudatum.com/activity/bargain/personInfo',
-    {activityId, openid, isRank}, 'get');
+MyRequest.getConfig = (activityId) => {
+  return MyRequest.requestObservable('http://activity.wechat.cloudatum.com/activity/bargain/getBargainInfo',
+    {activityId}, 'get');
 };
 
 module.exports = MyRequest;

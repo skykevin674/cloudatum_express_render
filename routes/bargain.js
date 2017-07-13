@@ -24,14 +24,15 @@ const prefetchBargain = (req, res) => {
   let map = {}, query = trimQuery(req.query);
   Rx.Observable.zip(
     BargainRequest.getWxConfig(query.originalid, `${req.protocol}://${req.hostname}${req.path}`),
-    BargainRequest.getFansInfo(query.openid || query.auth2Id, query.originalid, query.scope, query.auth2Token),
-    // BargainRequest.getConfig(query.activityId),
+    BargainRequest.getFansInfo(query.openid || query.auth2Id, query.originalid, query.scope, query.auth2Token, query.auth2UnionId, query.type),
+    BargainRequest.getConfig(query.activityId),
     BargainRequest.getProducts(query.activityId),
     // BargainRequest.getMy(query.activityId, query.openid || query.auth2Id, true),
-    (wx, fans, products) => {
+    (wx, fans, config, products) => {
       map.signUrl = `${req.protocol}://${req.hostname}${req.path}`;
       map.wx = wx.data;
       map.fans = fans.data;
+      map.config = config.data;
       map.products = products.data;
       // map.my = my.data
     }
