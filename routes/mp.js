@@ -92,10 +92,29 @@ router.get('/test', function (req, res) {
   res.send($.html());
 });
 
+router.get('/getFuckingWxPic', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  if (req.query.url) {
+    request({url: decodeURIComponent(req.query.url), encoding: null}, (error, response, body) => {
+      if (!error && response.statusCode == 200) {
+        // res.header('content-type', response.headers['content-type']);
+        const prefix = 'data:' + response.headers['content-type'] + ';base64,';
+        let base64 = prefix + new Buffer(body, 'binary').toString('base64');
+        res.send({code: 0, data: base64});
+        // console.log(body);
+      }else {
+        res.send({code: -1});
+      }
+    });
+  } else {
+    res.send({code: -122});
+  }
+});
+
 router.get('/time', function (req, res) {
   res.header('Access-Control-Allow-Origin', '*');
   const date = new Date();
-  res.send({code: 0, day: date.getDate()});
+  res.send({code: 0, day: date.getDate(), month: date.getMonth()+1});
 });
 
 router.get('', function (req, res) {
