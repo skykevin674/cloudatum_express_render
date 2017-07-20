@@ -21,4 +21,5 @@ MyRequest.getConfig = (activityId) => {
     {activityId}, 'get');
 };
 
+
 module.exports = MyRequest;

@@ -64,6 +64,8 @@ function MyRequest () {
   };
 
   const fromOpen = (originalId, unionId) => {
+    console.log(originalId)
+    console.log(unionId)
     return requestObservable('http://base.wechat.cloudatum.com/api/getFansInfo',
         {originalid: originalId, unionid: unionId}, 'get')
   };
