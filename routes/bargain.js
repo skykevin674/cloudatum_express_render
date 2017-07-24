@@ -12,7 +12,6 @@ const render = require('../util/render.util');
 // import VoteRequest from '../http/http.vote';
 const BargainRequest = require('../http/http.bargain');
 
-
 const trimQuery = (query) => {
   for (let i in query) {
     query[i] = query[i].replace('\/', '');
@@ -28,8 +27,9 @@ const prefetchBargain = (req, res) => {
     BargainRequest.getFansInfo(query.openid || query.auth2Id, query.originalid, query.scope, query.auth2Token, query.auth2UnionId, query.type),
     BargainRequest.getConfig(query.activityId),
     BargainRequest.getProducts(query.activityId),
+    BargainRequest.getShare(query.activityId, query.share, true),
     // BargainRequest.getMy(query.activityId, query.openid || query.auth2Id, true),
-    (wx, bwx, fans, config, products) => {
+    (wx, bwx, fans, config, products, share) => {
       map.signUrl = `${req.protocol}://${req.hostname}${req.path}`;
       map.backWx = bwx.data;
       map.wx = wx.data;
@@ -43,12 +43,26 @@ const prefetchBargain = (req, res) => {
         }
       }
       map.shareNumber = query.share;
+      map.share = share;
       // map.my = my.data
     }
   ).subscribe(
-    () => render.render(req, res, map), err => {
-      console.log(err);
-    }
+      () => {
+        if(map.products.code == 0 && map.products.body.length > 0 && map.fans && map.fans.code == 0) {
+          BargainRequest.queryMyList(map.products.body, map.fans.body.openId).subscribe(result => {
+            map.myInfo = [];
+            for(let item of result){
+              map.myInfo.push(item.data);
+            }
+            render.render(req, res, map);
+          }, err => {
+            console.log(err)
+          });
+        }
+      }, err => {
+        console.log(err);
+      }
+
   );
 };
 

@@ -11,9 +11,27 @@ MyRequest.getProducts = (activityId) => {
     'get');
 };
 
-MyRequest.getMy = (activityId, openid, isRank) => {
+MyRequest.getMy = (activityId, productId, openid, isRank) => {
   return MyRequest.requestObservable('http://activity.wechat.cloudatum.com/activity/bargain/personInfo',
-    {activityId, openid, isRank}, 'get');
+    {activityId, openid, isRank, productId}, 'get');
+};
+
+MyRequest.getShare = (activityId, share, isRank) => {
+  if(share && share.indexOf('_') > 0) {
+    return MyRequest.requestObservable('http://activity.wechat.cloudatum.com/activity/bargain/personInfo',
+        {activityId, number: share.split('_')[1], isRank, productId: share.split('_')[0]}, 'get');
+  }else {
+    return Rx.Observable.of({code : -1});
+  }
+
+};
+
+MyRequest.queryMyList = (products, openid) => {
+  let tmp = [];
+  for(let item of products){
+    tmp.push(MyRequest.getMy(item.activityId, item.id, openid, true));
+  }
+  return Rx.Observable.forkJoin(...tmp);
 };
 
 MyRequest.getConfig = (activityId) => {

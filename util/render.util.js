@@ -25,6 +25,7 @@ module.exports = (function () {
     `);
     tag.appendTo($('body'));
     res.status(200);
+    // res.send('complete')
     res.send($.html());
   };
 
